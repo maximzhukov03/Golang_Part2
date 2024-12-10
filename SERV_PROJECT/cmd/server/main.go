@@ -1,69 +1,98 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"database/sql"
 
-
-	_ "github.com/lib/pq"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 )
 
 type Product struct {
 	ID int
 	NAME string
+	PRICE int
 }
 
-var products = []Product{{1, "CocaCola"}, {2, "Pepsi"}}
-
-
 func main(){
+	connection := "host=127.0.0.1 port=5432 user=postgres dbname=product_data sslmode=disable password=goLANG"
+	db, err := sql.Open("postgres", connection)
+	if err != nil{
+		log.Fatal(err)
+	}
+	defer db.Close()
+	if err := db.Ping(); err != nil{
+		log.Fatal(err)
+	}
 	r := mux.NewRouter()
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
-		fmt.Println("HELLO")
-	})
-	r.HandleFunc("/ProductsName/{key}", ProductHandlerName)
+	r.HandleFunc("/Products/", ProductHandle)
 	r.HandleFunc("/ProductsID/{key}", ProductHandlerId)
 	http.ListenAndServe(":8080", r)
 
 }
 
-
-func ProductHandlerName(w http.ResponseWriter, r *http.Request){
-	deserilizer := Product{}
-	vars := mux.Vars(r)
-	name := vars["key"]
-	for elem := range products{
-		if products[elem].NAME == name{
-			jsonBytes, err := json.Marshal(&products[elem])
-			if err != nil{
-				log.Fatal(err)
-			}
-			w.Write(jsonBytes)
-			log.Printf("Структура %v предоставленна в виде битов\n", jsonBytes)
-			fmt.Printf("Продукт под номером %d\n", products[elem].ID)
-			err = json.Unmarshal(jsonBytes, &deserilizer)
-			if err != nil{
-				log.Fatal(err)
-			}
-			log.Printf("Структурап ерезаписана в JSON формат %v\n", deserilizer)
+func ProductHandle(w http.ResponseWriter, r *http.Request){
+	switch r.Method{
+		case http.MethodGet: 
+		connection := "host=127.0.0.1 port=5432 user=postgres dbname=product_data sslmode=disable password=goLANG"
+		db, err := sql.Open("postgres", connection)
+		if err != nil{
+			log.Fatal(err)
 		}
+		defer db.Close()
+		if err := db.Ping(); err != nil{
+			log.Fatal(err)
+		}
+		ProductHandlerGet(w, r, db)
+		default: w.WriteHeader(http.StatusBadRequest)
 	}
+}
+
+
+func ProductHandlerGet(w http.ResponseWriter, r *http.Request, db *sql.DB){
+	product, err := ProductHandler(db)
+	if err != nil{
+		log.Fatal(err)
+		return
+	}
+	jsonBytes, err := json.Marshal(product)
+	if err != nil{
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Fatal(err)
+		return
+	}
+	w.Write(jsonBytes)
+}
+
+func ProductHandler(db *sql.DB) ([]Product, error){
+	rows, err := db.Query("SELECT * FROM product_data")
+	if err != nil{
+		fmt.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	products := make([]Product, 0)
+	for rows.Next(){
+		u := Product{}
+		err := rows.Scan(&u.ID, &u.NAME, &u.PRICE)
+		if err != nil{
+			log.Fatal(err)
+			return nil, err
+		}
+		products = append(products, u)
+	}
+	return products, nil
 }
 
 func ProductHandlerId(w http.ResponseWriter, r *http.Request){
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["key"])
+	_, err := strconv.Atoi(vars["key"])
 	if err != nil{
 		fmt.Println(err)
-	}
-	for elem := range products{
-		if products[elem].ID == id{
-			fmt.Printf("Продукт называется %s\n", products[elem].NAME)
-		}
 	}
 }
