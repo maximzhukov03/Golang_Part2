@@ -2,7 +2,7 @@ POST http://localhost:8080/Products/2
 # Content-Type: application/json
 ###
 
-GET http://localhost:8080/Products/
+GET http://localhost:8080/ProductsID/49
 
 ###
 

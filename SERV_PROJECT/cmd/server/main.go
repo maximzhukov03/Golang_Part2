@@ -127,15 +127,17 @@ func ProductHandlerId(w http.ResponseWriter, r *http.Request, db *sql.DB) (Produ
 	if err != nil{
 		fmt.Println(err)
 	}
-	rows, err := db.Query("SELECT FROM product_data WHERE id = $1", key_id)
+	rows, err := db.Query("SELECT * FROM product_data WHERE ID = $1", key_id)
 	if err != nil{
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	p := Product{}
-	err = rows.Scan(&p.ID, &p.NAME, &p.PRICE)
-	if err != nil{
-		log.Fatal(err)
+	for rows.Next(){
+		err = rows.Scan(&p.ID, &p.NAME, &p.PRICE)
+		if err != nil{
+			log.Fatal(err)
+		}
 	}
 	return p, nil
 }
