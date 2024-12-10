@@ -1,0 +1,15 @@
+POST http://localhost:8080/user
+Content-Type: application/json
+
+{"id": 501, "first_name": "Filipe", "second_name": "MAXIMKA", "email": "farsh23@mail.ru", "password": "sdkfjldsakjf"}
+
+###
+
+GET http://localhost:8080/Products/
+
+###
+
+DELETE http://localhost:8080/user
+Content-Type: application/json
+
+{"first_name": "Filipe"}
