@@ -1,10 +1,12 @@
+GET http://localhost:8080/ProductsID/49
+
+###
+
 POST http://localhost:8080/Products/2
 # Content-Type: application/json
 ###
 
-GET http://localhost:8080/ProductsID/49
 
-###
 
 DELETE http://localhost:8080/user
 # Content-Type: application/json
