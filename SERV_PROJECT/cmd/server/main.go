@@ -141,3 +141,7 @@ func ProductHandlerId(w http.ResponseWriter, r *http.Request, db *sql.DB) (Produ
 	}
 	return p, nil
 }
+
+func ProductDelete(w http.ResponseWriter, r *http.Request, db *sql.DB){
+	
+}
