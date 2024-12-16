@@ -31,6 +31,7 @@ func main(){
 	r := mux.NewRouter()
 	r.HandleFunc("/Products/", ProductHandle)
 	r.HandleFunc("/ProductsID/{key}", ProductHandleId)
+	r.HandleFunc("/ProductDel/{key}", ProductDeleteId)
 	http.ListenAndServe(":8080", r)
 
 }
@@ -54,19 +55,34 @@ func ProductHandle(w http.ResponseWriter, r *http.Request){
 }
 
 func ProductHandleId(w http.ResponseWriter, r *http.Request){
-		connection := "host=127.0.0.1 port=5432 user=postgres dbname=product_data sslmode=disable password=goLANG"
-		db, err := sql.Open("postgres", connection)
-		if err != nil{
-			log.Fatal(err)
-		}
-		defer db.Close()
-		if err := db.Ping(); err != nil{
-			log.Fatal(err)
-		}
+	connection := "host=127.0.0.1 port=5432 user=postgres dbname=product_data sslmode=disable password=goLANG"
+	db, err := sql.Open("postgres", connection)
+	if err != nil{
+		log.Fatal(err)
+	}
+	defer db.Close()
+	if err := db.Ping(); err != nil{
+		log.Fatal(err)
+	}
+	switch r.Method{
+		case http.MethodGet: ProductHandlerGetId(w, r, db)
+		default: w.WriteHeader(http.StatusBadRequest)
+	}
+}
 
-		switch r.Method{
-			case http.MethodGet: ProductHandlerGetId(w, r, db)
-			default: w.WriteHeader(http.StatusBadRequest)
+func ProductDeleteId(w http.ResponseWriter, r *http.Request){
+	connection := "host=127.0.0.1 port=5432 user=postgres dbname=product_data sslmode=disable password=goLANG"
+	db, err := sql.Open("postgres", connection)
+	if err != nil{
+		log.Fatal(err)
+	}
+	defer db.Close()
+	if err := db.Ping(); err != nil{
+		log.Fatal(err)
+	}
+	switch r.Method{
+	case http.MethodDelete: ProductDelete(w, r, db)
+	default: w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
