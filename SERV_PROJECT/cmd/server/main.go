@@ -188,7 +188,7 @@ func ProductDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 	if err != nil{
 		log.Fatal(err)
 	}
-	log.Println("USER DELETE")
+	log.Println("PRODUCT DELETE")
 	return err
 }
 
@@ -201,5 +201,10 @@ func ProductPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if err = json.Unmarshal(reqBytes, &prod); err != nil{
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	log.Println(prod)
+	
+	_, err = db.Exec("INSERT INTO product_data (id, name, price) VALUES ($1, $2, $3)", prod.ID, prod.NAME, prod.PRICE)
+	if err != nil{
+		log.Fatal("NOT POST")
+	}
+	log.Println("PRODUCT POST")
 }
