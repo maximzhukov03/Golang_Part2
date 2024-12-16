@@ -1,9 +1,15 @@
+GET http://localhost:8080/Products/
+
+###
+
 GET http://localhost:8080/ProductsID/49
 
 ###
 
-POST http://localhost:8080/Products/2
-# Content-Type: application/json
+POST http://localhost:8080/ProductPost/
+Content-Type: application/json
+
+{"id": 50, "name": "Chease", "price": 1000}
 ###
 
 
