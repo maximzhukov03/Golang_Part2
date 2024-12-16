@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -17,6 +18,8 @@ type Product struct {
 	NAME string
 	PRICE int
 }
+
+var prod Product
 
 func main(){
 	connection := "host=127.0.0.1 port=5432 user=postgres dbname=product_data sslmode=disable password=goLANG"
@@ -82,6 +85,22 @@ func ProductDeleteId(w http.ResponseWriter, r *http.Request){
 	}
 	switch r.Method{
 	case http.MethodDelete: ProductDelete(w, r, db)
+	default: w.WriteHeader(http.StatusBadRequest)
+	}
+}
+
+func ProductHendlerPost(w http.ResponseWriter, r *http.Request){
+	connection := "host=127.0.0.1 port=5432 user=postgres dbname=product_data sslmode=disable password=goLANG"
+	db, err := sql.Open("postgres", connection)
+	if err != nil{
+		log.Fatal(err)
+	}
+	defer db.Close()
+	if err := db.Ping(); err != nil{
+		log.Fatal(err)
+	}
+	switch r.Method{
+	case http.MethodPost: ProductPost(w, r, db)
 	default: w.WriteHeader(http.StatusBadRequest)
 	}
 }
@@ -170,4 +189,16 @@ func ProductDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
 	}
 	log.Println("USER DELETE")
 	return err
+}
+
+func ProductPost(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	reqBytes, err := io.ReadAll(r.Body)
+	if err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+		log.Fatal(err)
+	}
+	if err = json.Unmarshal(reqBytes, &prod); err != nil{
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	log.Println(prod)
 }
