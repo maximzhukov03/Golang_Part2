@@ -35,6 +35,7 @@ func main(){
 	r.HandleFunc("/Products/", ProductHandle)
 	r.HandleFunc("/ProductsID/{key}", ProductHandleId)
 	r.HandleFunc("/ProductDel/{key}", ProductDeleteId)
+	r.HandleFunc("/ProductPost/", ProductHendlerPost)
 	http.ListenAndServe(":8080", r)
 
 }
