@@ -142,6 +142,16 @@ func ProductHandlerId(w http.ResponseWriter, r *http.Request, db *sql.DB) (Produ
 	return p, nil
 }
 
-func ProductDelete(w http.ResponseWriter, r *http.Request, db *sql.DB){
-	
+func ProductDelete(w http.ResponseWriter, r *http.Request, db *sql.DB) error {
+	vars := mux.Vars(r)
+	key_id, err := strconv.Atoi(vars["key"])
+	if err != nil{
+		log.Fatal(err)
+	}
+	_, err = db.Exec("DELETE FROM product_data WHERE ID = $1", key_id)
+	if err != nil{
+		log.Fatal(err)
+	}
+	log.Println("USER DELETE")
+	return err
 }
