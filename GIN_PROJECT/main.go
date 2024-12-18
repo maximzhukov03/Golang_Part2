@@ -109,14 +109,13 @@ func getAlbumsId(c *gin.Context){
 
 func deleteAlbumsId(c *gin.Context){
 	id := c.Param("id")
-
-	for index, elem := range albums{
-		if elem.ID == id{
-			albums = append(albums[:index], albums[index+1:]...)
-			c.IndentedJSON(http.StatusOK, elem)
-			log.Printf("DELETED ALBUM %s", elem.ID)
-			return
-		}
-	}
+	deleteAlbumIdBD(db, id)
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
+}
+
+func deleteAlbumIdBD(db *sql.DB, id string){
+	_, err := db.Exec("DELETE FROM movie_table WHERE id = $1", id)
+	if err != nil{
+		log.Println("Ошибка в запросе")
+	}
 }
