@@ -76,14 +76,26 @@ func postAlbums(c *gin.Context) {
     if err := c.BindJSON(&newAlbum); err != nil {
         return
     }
-    albums = append(albums, newAlbum)
+    postAlbumDb(newAlbum)
     c.IndentedJSON(http.StatusCreated, newAlbum)
 	log.Println("POST ALBUM")
 }
 
+func postAlbumDb(newAlbum album){
+	_, err := db.Exec("INSERT INTO movie_table (id, title, artist, price) VALUES ($1, $2, $3, $4)", newAlbum.ID, newAlbum.Title, newAlbum.Artist, newAlbum.Price)
+	if err != nil{
+		log.Println("Ошибка в запросе")
+		return
+	}
+}
+
 func getAlbumsId(c *gin.Context){
 	id := c.Param("id")
-
+	albums, err := getAlbumsDb()
+	if err != nil{
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "albums not found"})
+		return
+	}
 	for _, elem := range albums{
 		if elem.ID == id{
 			log.Printf("GET ALBUM %s", elem.ID)
@@ -93,6 +105,7 @@ func getAlbumsId(c *gin.Context){
 	}
 	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "album not found"})
 }
+
 
 func deleteAlbumsId(c *gin.Context){
 	id := c.Param("id")
